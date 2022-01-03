@@ -59,7 +59,7 @@ func vdsoMemoryAddress(r io.Reader) (uint64, error) {
 
 	// Loop through all tag/value pairs in auxv until we find `AT_SYSINFO_EHDR`,
 	// the address of a page containing the virtual Dynamic Shared Object (vDSO).
-	aux := struct{ Tag, Val uint64 }{}
+	aux := auxStruct{}
 	for {
 		if err := binary.Read(r, NativeEndian, &aux); err != nil {
 			return 0, fmt.Errorf("reading auxv entry: %w", err)
@@ -68,7 +68,7 @@ func vdsoMemoryAddress(r io.Reader) (uint64, error) {
 		switch aux.Tag {
 		case _AT_SYSINFO_EHDR:
 			if aux.Val != 0 {
-				return aux.Val, nil
+				return uint64(aux.Val), nil
 			}
 			return 0, fmt.Errorf("invalid vDSO address in auxv")
 		// _AT_NULL is always the last tag/val pair in the aux vector
